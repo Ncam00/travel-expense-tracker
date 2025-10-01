@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "autoprefixer": "^10.4.21",
+    "firebase": "^12.3.0",
+    "postcss": "^8.5.6",
+    "react-router-dom": "^7.9.3",
+    "tailwindcss": "^4.1.13"
+  }
+}
