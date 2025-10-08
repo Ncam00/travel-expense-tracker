@@ -1,6 +1,17 @@
 import { Outlet, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Layout() {
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Failed to logout:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm">
@@ -10,12 +21,31 @@ export default function Layout() {
               TravelTracker
             </Link>
             <div className="space-x-4">
-              <Link to="/login" className="text-gray-600 hover:text-gray-900">
-                Login
-              </Link>
-              <Link to="/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                Sign Up
-              </Link>
+              {user ? (
+                <>
+                  <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
+                    Dashboard
+                  </Link>
+                  <Link to="/profile" className="text-gray-600 hover:text-gray-900">
+                    Profile
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="text-gray-600 hover:text-gray-900">
+                    Login
+                  </Link>
+                  <Link to="/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    Sign Up
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -24,5 +54,6 @@ export default function Layout() {
         <Outlet />
       </main>
     </div>
-  )
+  );
 }
+

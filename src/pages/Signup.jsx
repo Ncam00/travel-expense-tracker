@@ -21,9 +21,9 @@ export default function Signup() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10">
+    <div className="max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Sign Up</h1>
       <div className="bg-white p-8 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Sign Up</h2>
         {error && (
           <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
             {error}
