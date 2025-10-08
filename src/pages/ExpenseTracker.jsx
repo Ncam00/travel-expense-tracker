@@ -16,32 +16,39 @@ export default function ExpenseTracker() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    const loadExpenses = async () => {
+      if (!user) return;
+      setLoading(true);
+      try {
+        const data = await getUserExpenses(user.id);
+        setExpenses(data);
+      } catch (err) {
+        setError('Failed to load expenses');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadExpenses();
   }, [user]);
-
-  const loadExpenses = async () => {
-    try {
-      const userExpenses = await getUserExpenses(user.uid);
-      setExpenses(userExpenses);
-    } catch (err) {
-      setError('Failed to load expenses');
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
-      await addExpense(user.uid, expense);
+      await addExpense({ ...expense, userId: user.id });
       setExpense({
         amount: '',
         description: '',
         category: 'food',
         date: new Date().toISOString().split('T')[0]
       });
-      await loadExpenses();
+      // Option 1: Refetch expenses
+      const data = await getUserExpenses(user.id);
+      setExpenses(data);
+      // Option 2: Optimistically update the expense list
+      setExpenses(prev => [...prev, { ...expense, id: Date.now() }]);
     } catch (err) {
       setError('Failed to add expense');
     } finally {
