@@ -32,7 +32,6 @@ export default function ExpenseTracker() {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       await addExpense(user.uid, expense);
       setExpense({
