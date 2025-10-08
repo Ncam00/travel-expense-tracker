@@ -6,7 +6,6 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
-import ExpenseTracker from './pages/ExpenseTracker';
 
 export default function App() {
   return (
@@ -21,14 +20,6 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="expenses"
-            element={
-              <ProtectedRoute>
-                <ExpenseTracker />
               </ProtectedRoute>
             }
           />
