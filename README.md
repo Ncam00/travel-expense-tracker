@@ -51,12 +51,12 @@ npm run dev
 ### Phase 1: Foundation (Weeks 1-2)
 **Goal: Basic app structure and authentication**
 
-- [ ] Set up project with Vite + React
-- [ ] Install core dependencies (React Router, Firebase, TailwindCSS)
-- [ ] Configure Firebase project (Authentication, Firestore)
-- [ ] Create basic app layout and navigation
-- [ ] Implement user authentication (sign up, login, logout)
-- [ ] Create user profile page
+- [x] Set up project with Vite + React
+- [x] Install core dependencies (React Router, Firebase, TailwindCSS)
+- [x] Configure Firebase project (Authentication, Firestore)
+- [x] Create basic app layout and navigation
+- [x] Implement user authentication (sign up, login, logout)
+- [x] Create user profile page
 
 ### Phase 2: Core Features (Weeks 3-5)
 **Goal: Trip creation and basic expense tracking**
