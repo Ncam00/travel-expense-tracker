@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { addExpense, getUserExpenses } from '../services/expenseService';
+import { EXPENSE_CATEGORIES } from '../constants/expenseCategories';
 
 export default function ExpenseTracker() {
   const { user } = useAuth();
@@ -70,11 +71,35 @@ export default function ExpenseTracker() {
           />
         </div>
         <div>
+          <label className="block mb-1">Category</label>
+          <select
+            value={expense.category}
+            onChange={(e) => setExpense({...expense, category: e.target.value})}
+            className="w-full border rounded px-3 py-2"
+          >
+            {EXPENSE_CATEGORIES.map(category => (
+              <option key={category.id} value={category.id}>
+                {category.icon} {category.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
           <label className="block mb-1">Description</label>
           <input
             type="text"
             value={expense.description}
             onChange={(e) => setExpense({...expense, description: e.target.value})}
+            className="w-full border rounded px-3 py-2"
+            required
+          />
+        </div>
+        <div>
+          <label className="block mb-1">Date</label>
+          <input
+            type="date"
+            value={expense.date}
+            onChange={(e) => setExpense({...expense, date: e.target.value})}
             className="w-full border rounded px-3 py-2"
             required
           />
@@ -91,17 +116,25 @@ export default function ExpenseTracker() {
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-4">Recent Expenses</h2>
         <div className="space-y-4">
-          {expenses.map((exp) => (
-            <div key={exp.id} className="border rounded p-4">
-              <div className="flex justify-between">
-                <span className="font-medium">{exp.description}</span>
-                <span className="text-green-600">${exp.amount}</span>
+          {expenses.map((exp) => {
+            const category = EXPENSE_CATEGORIES.find(c => c.id === exp.category);
+            return (
+              <div key={exp.id} className="border rounded p-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="font-medium">{exp.description}</span>
+                    <span className="ml-2 text-gray-500">
+                      {category?.icon} {category?.label}
+                    </span>
+                  </div>
+                  <span className="text-green-600">${exp.amount}</span>
+                </div>
+                <div className="text-sm text-gray-500">
+                  {new Date(exp.date).toLocaleDateString()}
+                </div>
               </div>
-              <div className="text-sm text-gray-500">
-                {new Date(exp.date).toLocaleDateString()}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
