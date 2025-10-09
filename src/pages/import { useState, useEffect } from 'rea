@@ -1,0 +1,126 @@
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { expenseService, tripService } from "../services/firebaseConfig";
+
+const ExpenseTracker = () => {
+  const { currentUser } = useAuth();
+  const [expenses, setExpenses] = useState([]);
+  const [trips, setTrips] = useState([]);
+  const [selectedTrip, setSelectedTrip] = useState(null);
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+  const [date, setDate] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    const fetchTrips = async () => {
+      if (currentUser) {
+        const tripsData = await tripService.getTripsByUserId(currentUser.uid);
+        setTrips(tripsData);
+      }
+    };
+
+    fetchTrips();
+  }, [currentUser]);
+
+  useEffect(() => {
+    const fetchExpenses = async () => {
+      if (selectedTrip) {
+        const expensesData = await expenseService.getExpensesByTripId(selectedTrip);
+        setExpenses(expensesData);
+      }
+    };
+
+    fetchExpenses();
+  }, [selectedTrip]);
+
+  const handleTripSelect = (tripId) => {
+    setSelectedTrip(tripId);
+  };
+
+  const handleAddExpense = async (e) => {
+    e.preventDefault();
+
+    if (!amount || !description || !date) {
+      setError('Please fill in all fields');
+      return;
+    }
+
+    setError('');
+
+    try {
+      await expenseService.addExpense({
+        tripId: selectedTrip,
+        amount: parseFloat(amount),
+        description,
+        date: new Date(date),
+        userId: currentUser.uid,
+      });
+
+      setSuccess('Expense added successfully');
+      setAmount('');
+      setDescription('');
+      setDate('');
+    } catch (err) {
+      setError('Failed to add expense');
+    }
+  };
+
+  return (
+    <div>
+      <h1>Expense Tracker</h1>
+
+      <div>
+        <h2>Your Trips</h2>
+        <ul>
+          {trips.map((trip) => (
+            <li key={trip.id} onClick={() => handleTripSelect(trip.id)}>
+              {trip.destination} - {trip.date}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {selectedTrip && (
+        <div>
+          <h2>Expenses for Trip</h2>
+          <form onSubmit={handleAddExpense}>
+            <input
+              type="number"
+              placeholder="Amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+            <button type="submit">Add Expense</button>
+          </form>
+
+          {error && <p>{error}</p>}
+          {success && <p>{success}</p>}
+
+          <ul>
+            {expenses.map((expense) => (
+              <li key={expense.id}>
+                {expense.description}: ${expense.amount} on {new Date(expense.date).toLocaleDateString()}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ExpenseTracker;

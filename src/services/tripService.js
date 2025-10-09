@@ -6,6 +6,7 @@ import {
   where, 
   getDocs, 
   doc, 
+  getDoc,
   updateDoc, 
   deleteDoc 
 } from 'firebase/firestore';
@@ -45,12 +46,12 @@ export const getUserTrips = async (userId) => {
 // Get trip details by ID
 export const getTripById = async (tripId) => {
   try {
-    const tripDoc = await doc(db, 'trips', tripId);
-    const tripData = await tripDoc.get();
-    if (!tripData.exists()) {
+    const tripRef = doc(db, 'trips', tripId);
+    const tripDoc = await getDoc(tripRef);
+    if (!tripDoc.exists()) {
       throw new Error('Trip not found');
     }
-    return { id: tripData.id, ...tripData.data() };
+    return { id: tripDoc.id, ...tripDoc.data() };
   } catch (error) {
     console.error('Error fetching trip:', error);
     throw error;

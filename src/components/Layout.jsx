@@ -26,11 +26,14 @@ export default function Layout() {
                   <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
                     Dashboard
                   </Link>
+                  <Link to="/trips" className="text-gray-600 hover:text-gray-900">
+                    Trips
+                  </Link>
                   <Link to="/expenses" className="text-gray-600 hover:text-gray-900">
                     Expenses
                   </Link>
-                  <Link to="/profile" className="text-gray-600 hover:text-gray-900">
-                    Profile
+                  <Link to="/analytics" className="text-gray-600 hover:text-gray-900">
+                    Analytics
                   </Link>
                   <button
                     onClick={handleLogout}

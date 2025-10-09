@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { EXPENSE_CATEGORIES, getCategoryById } from '../constants/expenseCategories';
 import { getTripStats, getUserTrips } from '../services/tripService';
@@ -62,6 +63,28 @@ export default function TripDashboard() {
 
   return (
     <div className="max-w-7xl mx-auto p-4">
+      {/* Header with Actions */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-gray-600 mt-1">Track your travel expenses and budget</p>
+        </div>
+        <div className="flex space-x-3">
+          <Link
+            to="/trips"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Manage Trips
+          </Link>
+          <button 
+            onClick={() => setIsModalOpen(true)} 
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Add Expense
+          </button>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Budget Overview Card */}
         <div className="bg-white p-6 rounded-lg shadow-sm col-span-full">

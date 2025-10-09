@@ -1,52 +1,45 @@
-import { Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute';
+import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
-import Signup from './pages/Signup';
+import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ExpenseTracker from './pages/ExpenseTracker';
-import TripDashboard from './pages/TripDashboard';
-import Profile from './pages/Profile';
+import TripPlanner from './pages/TripPlanner';
+import ProtectedRoute from './components/ProtectedRoute';
+import './App.css';
 
-export default function App() {
+function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route element={<Layout />}>
-          {/* Public Routes */}
-          <Route index element={<Home />} />
-          <Route path="login" element={<Login />} />
-          <Route path="signup" element={<Signup />} />
-
-          {/* Protected Routes */}
-          <Route
-            path="dashboard"
-            element={
+      <Router>
+        <div className="min-h-screen bg-gray-100">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={
               <ProtectedRoute>
-                <TripDashboard />
+                <Dashboard />
               </ProtectedRoute>
-            }
-          />
-          <Route
-            path="expenses"
-            element={
+            } />
+            <Route path="/expenses" element={
               <ProtectedRoute>
                 <ExpenseTracker />
               </ProtectedRoute>
-            }
-          />
-          <Route
-            path="profile"
-            element={
+            } />
+            <Route path="/trips" element={
               <ProtectedRoute>
-                <Profile />
+                <TripPlanner />
               </ProtectedRoute>
-            }
-          />
-        </Route>
-      </Routes>
+            } />
+          </Routes>
+        </div>
+      </Router>
     </AuthProvider>
   );
 }
+
+export default App;
