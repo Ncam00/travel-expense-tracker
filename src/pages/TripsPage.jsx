@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserTrips, deleteTrip } from '../services/tripService';
-import { getUserExpenses } from '../services/expenseService';
+import { tripService } from '../services/tripService';
+import { expenseService } from '../services/expenseService';
 import TripModal from '../components/TripModal';
 
 export default function TripsPage() {
@@ -21,8 +21,8 @@ export default function TripsPage() {
     try {
       setLoading(true);
       const [userTrips, userExpenses] = await Promise.all([
-        getUserTrips(user.uid),
-        getUserExpenses(user.uid)
+        tripService.getTrips(user.uid),
+        expenseService.getExpenses(user.uid)
       ]);
 
       // Calculate spending for each trip
@@ -73,7 +73,7 @@ export default function TripsPage() {
     }
 
     try {
-      await deleteTrip(tripId);
+      await tripService.deleteTrip(tripId);
       await loadTrips();
     } catch (err) {
       setError('Failed to delete trip');

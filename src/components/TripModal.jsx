@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { createTrip, updateTrip } from '../services/tripService';
+import { tripService } from '../services/tripService';
 import { useAuth } from '../context/AuthContext';
 
 export default function TripModal({ isOpen, onClose, onSubmit, trip = null }) {
@@ -78,10 +78,13 @@ export default function TripModal({ isOpen, onClose, onSubmit, trip = null }) {
 
       if (trip) {
         // Update existing trip
-        await updateTrip(trip.id, tripDataToSubmit);
+        await tripService.updateTrip(trip.id, tripDataToSubmit);
       } else {
         // Create new trip
-        await createTrip(user.uid, tripDataToSubmit);
+        await tripService.addTrip({
+          ...tripDataToSubmit,
+          userId: user.uid
+        });
       }
 
       onSubmit && onSubmit();

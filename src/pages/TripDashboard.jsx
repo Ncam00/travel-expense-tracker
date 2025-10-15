@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { EXPENSE_CATEGORIES, getCategoryById } from '../constants/expenseCategories';
-import { getTripStats, getUserTrips } from '../services/tripService';
-import { addExpense, getRecentExpenses } from '../services/expenseService';
+import { tripService } from '../services/tripService';
+import { expenseService } from '../services/expenseService';
 import QuickExpenseModal from '../components/QuickExpenseModal';
 
 export default function TripDashboard() {
