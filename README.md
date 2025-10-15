@@ -51,23 +51,23 @@ npm run dev
 ### Phase 1: Foundation (Weeks 1-2)
 **Goal: Basic app structure and authentication**
 
-- [ ] Set up project with Vite + React
-- [ ] Install core dependencies (React Router, Firebase, TailwindCSS)
-- [ ] Configure Firebase project (Authentication, Firestore)
-- [ ] Create basic app layout and navigation
-- [ ] Implement user authentication (sign up, login, logout)
-- [ ] Create user profile page
+- [x] Set up project with Vite + React
+- [x] Install core dependencies (React Router, Firebase, TailwindCSS)
+- [x] Configure Firebase project (Authentication, Firestore)
+- [x] Create basic app layout and navigation
+- [x] Implement user authentication (sign up, login, logout)
+- [x] Create user profile page
 
-### Phase 2: Core Features (Weeks 3-5)
+### Phase 2: Core Features (Weeks 3-5) ✅ **COMPLETE**
 **Goal: Trip creation and basic expense tracking**
 
-- [ ] Design and implement database schema
-- [ ] Create trip creation flow
-- [ ] Build expense entry form
-- [ ] Implement expense categories
-- [ ] Create trip dashboard with budget overview
-- [ ] Add expense list with filtering
-- [ ] Build daily spending view
+- [x] Design and implement database schema
+- [x] Create trip creation flow
+- [x] Build expense entry form
+- [x] Implement expense categories
+- [x] Create trip dashboard with budget overview
+- [x] Add expense list with filtering
+- [x] Build daily spending view
 
 ### Phase 3: Location Tracking (Weeks 6-7)
 **Goal: Associate expenses with locations**

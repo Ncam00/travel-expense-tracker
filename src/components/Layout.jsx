@@ -26,8 +26,14 @@ export default function Layout() {
                   <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
                     Dashboard
                   </Link>
-                  <Link to="/profile" className="text-gray-600 hover:text-gray-900">
-                    Profile
+                  <Link to="/trips" className="text-gray-600 hover:text-gray-900">
+                    Trips
+                  </Link>
+                  <Link to="/expenses" className="text-gray-600 hover:text-gray-900">
+                    Expenses
+                  </Link>
+                  <Link to="/analytics" className="text-gray-600 hover:text-gray-900">
+                    Analytics
                   </Link>
                   <button
                     onClick={handleLogout}
@@ -41,8 +47,8 @@ export default function Layout() {
                   <Link to="/login" className="text-gray-600 hover:text-gray-900">
                     Login
                   </Link>
-                  <Link to="/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    Sign Up
+                  <Link to="/register" className="text-gray-600 hover:text-gray-900">
+                    Register
                   </Link>
                 </>
               )}
@@ -56,4 +62,3 @@ export default function Layout() {
     </div>
   );
 }
-
