@@ -7,7 +7,7 @@
 @layer base {
   body {
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #626883 0%, #3ea3a7 100%);
     min-height: 100vh;
   }
   
