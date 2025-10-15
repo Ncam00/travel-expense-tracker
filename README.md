@@ -69,14 +69,14 @@ npm run dev
 - [x] Add expense list with filtering
 - [x] Build daily spending view
 
-### Phase 3: Location Tracking (Weeks 6-7)
+### Phase 3: Location Tracking (Weeks 6-7) 🚧 **IN PROGRESS**
 **Goal: Associate expenses with locations**
 
-- [ ] Integrate Mapbox or Google Maps API
-- [ ] Add location picker to expense entry
-- [ ] Create location-based spending breakdown
-- [ ] Implement basic 2D map view of visited locations
-- [ ] Add transport mode selection (plane, train, car, etc.)
+- [x] Integrate Mapbox or Google Maps API
+- [x] Add location picker to expense entry
+- [x] Create location-based spending breakdown
+- [x] Implement basic 2D map view of visited locations
+- [x] Add transport mode selection (plane, train, car, etc.)
 
 ### Phase 4: Group Features (Weeks 8-10)
 **Goal: Multi-user trips and expense splitting**
@@ -93,8 +93,8 @@ npm run dev
 **Goal: Interactive 3D globe of travel history**
 
 - [ ] Set up Three.js or Cesium for 3D rendering
-- [ ] Create 3D globe component
-- [ ] Plot visited locations on globe
+- [ ] Create 3D globe component 
+- [ ] Plot visited locations on globe https://mult.dev/
 - [ ] Add travel routes with transport mode visualization
 - [ ] Implement interactive controls (zoom, rotate)
 - [ ] Add timeline/animation of trips

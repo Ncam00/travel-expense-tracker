@@ -1,64 +1,22 @@
-import { Outlet, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Outlet } from 'react-router-dom';
+import Navbar from './Navbar';
 
 export default function Layout() {
-  const { user, logout } = useAuth();
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Failed to logout:', error);
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <Link to="/" className="text-xl font-bold text-blue-600">
-              TravelTracker
-            </Link>
-            <div className="space-x-4">
-              {user ? (
-                <>
-                  <Link to="/dashboard" className="text-gray-600 hover:text-gray-900">
-                    Dashboard
-                  </Link>
-                  <Link to="/trips" className="text-gray-600 hover:text-gray-900">
-                    Trips
-                  </Link>
-                  <Link to="/expenses" className="text-gray-600 hover:text-gray-900">
-                    Expenses
-                  </Link>
-                  <Link to="/analytics" className="text-gray-600 hover:text-gray-900">
-                    Analytics
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="text-gray-600 hover:text-gray-900"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link to="/login" className="text-gray-600 hover:text-gray-900">
-                    Login
-                  </Link>
-                  <Link to="/register" className="text-gray-600 hover:text-gray-900">
-                    Register
-                  </Link>
-                </>
-              )}
-            </div>
-          </div>
+    <div className="min-h-screen">
+      <Navbar />
+      <main className="relative">
+        <div className="card-solid max-w-7xl mx-auto my-8 overflow-hidden">
+          <Outlet />
         </div>
-      </nav>
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <Outlet />
       </main>
+      
+      {/* Background decoration */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-40 -right-32 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{animationDelay: '4s'}}></div>
+      </div>
     </div>
   );
 }
