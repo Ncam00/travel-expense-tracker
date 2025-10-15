@@ -56,6 +56,12 @@ const Navbar = () => {
                 >
                   📈 Analytics
                 </Link>
+                <Link
+                  to="/testing"
+                  className={isActive('/testing') ? 'nav-link-active' : 'nav-link'}
+                >
+                  🧪 Testing
+                </Link>
                 <div className="flex items-center gap-3 ml-4 pl-4 border-l border-white/20">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-semibold text-sm">

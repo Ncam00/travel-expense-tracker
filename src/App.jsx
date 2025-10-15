@@ -9,6 +9,7 @@ import ExpenseTracker from './pages/ExpenseTracker';
 import TripsPage from './pages/TripsPage';
 import TripDashboard from './pages/TripDashboard';
 import Analytics from './pages/Analytics';
+import TestingPage from './pages/TestingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -47,6 +48,11 @@ function App() {
             <Route path="/analytics" element={
               <ProtectedRoute>
                 <Analytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/testing" element={
+              <ProtectedRoute>
+                <TestingPage />
               </ProtectedRoute>
             } />
           </Routes>
