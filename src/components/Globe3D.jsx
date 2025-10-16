@@ -1,15 +1,20 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { OrbitControls, Stars, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
-// Earth component with realistic textures
+// Earth component with realistic texture
 function Earth({ locations = [], selectedTrip = null, onLocationClick = () => {} }) {
   const earthRef = useRef();
   
-  // Load Earth textures (we'll use a simple color for now, but this can be enhanced with real Earth textures)
-  const earthTexture = useLoader(THREE.TextureLoader, 'https://raw.githubusercontent.com/turban/webgl-earth/master/images/2_no_clouds_4k.jpg');
-  const bumpMap = useLoader(THREE.TextureLoader, 'https://raw.githubusercontent.com/turban/webgl-earth/master/images/elev_bump_4k.jpg');
+  // Load realistic Earth texture with Suspense handling
+  let earthTexture;
+  try {
+    earthTexture = useLoader(THREE.TextureLoader, 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+  } catch (error) {
+    console.log('Earth texture loading failed, using blue fallback');
+    earthTexture = null;
+  }
   
   // Rotate the Earth slowly
   useFrame(() => {
@@ -20,15 +25,18 @@ function Earth({ locations = [], selectedTrip = null, onLocationClick = () => {}
 
   return (
     <group>
-      {/* Earth sphere */}
+      {/* Earth sphere with realistic texture */}
       <mesh ref={earthRef} position={[0, 0, 0]}>
         <sphereGeometry args={[2, 64, 64]} />
-        <meshPhongMaterial 
-          map={earthTexture}
-          bumpMap={bumpMap}
-          bumpScale={0.05}
-          shininess={1000}
-        />
+        {earthTexture ? (
+          <meshLambertMaterial map={earthTexture} />
+        ) : (
+          <meshLambertMaterial 
+            color="#2563eb"
+            transparent
+            opacity={0.9}
+          />
+        )}
       </mesh>
       
       {/* Location pins */}
@@ -310,49 +318,54 @@ export default function Globe3D({
     <div className={`w-full h-full ${className}`}>
       <Canvas
         camera={{ position: [0, 0, 5], fov: 75 }}
-        style={{ background: 'radial-gradient(circle, #1a1a2e 0%, #16213e 50%, #0f172a 100%)' }}
+        style={{ background: 'linear-gradient(to bottom, #000428, #004e92)' }}
       >
-        {/* Lighting */}
-        <ambientLight intensity={0.4} />
+        {/* Lighting - simplified to match working globe */}
+        <ambientLight intensity={0.6} />
         <pointLight position={[10, 10, 10]} intensity={1} />
-        <pointLight position={[-10, -10, -10]} intensity={0.5} color="#4169e1" />
         
         {/* Stars background */}
         <Stars 
           radius={100} 
           depth={50} 
-          count={5000} 
+          count={2000} 
           factor={4} 
           saturation={0} 
           fade 
-          speed={1}
         />
         
-        {/* Earth */}
-        <Earth 
-          locations={visibleLocations} 
-          selectedTrip={selectedTrip} 
-          onLocationClick={onLocationClick}
-        />
+        {/* Earth with Suspense for texture loading */}
+        <Suspense fallback={
+          <mesh position={[0, 0, 0]}>
+            <sphereGeometry args={[2, 32, 32]} />
+            <meshLambertMaterial color="#2563eb" transparent opacity={0.9} />
+          </mesh>
+        }>
+          <Earth 
+            locations={visibleLocations} 
+            selectedTrip={selectedTrip} 
+            onLocationClick={onLocationClick}
+          />
+        </Suspense>
         
-        {/* Travel routes */}
+        {/* Travel routes - simplified rendering */}
         {visibleRoutes.map((route, index) => (
           <TravelRoute 
-            key={`${route.from.lat}-${route.from.lng}-${route.to.lat}-${route.to.lng}-${index}`}
+            key={`route-${index}`}
             fromLocation={route.from}
             toLocation={route.to}
-            transportMode={route.transportMode}
-            animated={route.animated}
+            transportMode={route.transportMode || 'plane'}
+            animated={route.animated || false}
           />
         ))}
         
-        {/* Controls */}
+        {/* Controls - same as working globe */}
         <OrbitControls 
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
           minDistance={3}
-          maxDistance={10}
+          maxDistance={8}
         />
       </Canvas>
     </div>

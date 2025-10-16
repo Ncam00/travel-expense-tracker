@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Globe3DPage from './pages/Globe3DPage';
+import SimpleGlobePage from './pages/SimpleGlobePage';
 
 // Clean React components
 const Home = () => {
@@ -33,7 +34,7 @@ const Home = () => {
                   <p className="text-gray-600 text-sm mb-4">
                     Log and categorize your travel expenses with location data
                   </p>
-                  <a href="/expenses" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                  <a href="/testing" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
                     Start Tracking →
                   </a>
                 </div>
@@ -48,7 +49,7 @@ const Home = () => {
                   <p className="text-gray-600 text-sm mb-4">
                     Plan and organize your trips with collaborative features
                   </p>
-                  <a href="/trips" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                  <a href="/trip-creation-test" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
                     Plan Trip →
                   </a>
                 </div>
@@ -78,7 +79,7 @@ const Home = () => {
                   <p className="text-gray-600 text-sm mb-4">
                     Share trips and split expenses with travel companions
                   </p>
-                  <a href="/dashboard" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                  <a href="/debug" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
                     Collaborate →
                   </a>
                 </div>
@@ -183,6 +184,7 @@ const Navbar = () => {
             <div className="hidden md:flex space-x-6">
               <a href="/" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Home</a>
               <a href="/globe" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">🌍 3D Globe</a>
+              <a href="/simple-globe" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">🔵 Simple Globe</a>
               <a href="/debug" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Debug</a>
               <a href="/testing" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Testing</a>
               <a href="/trip-creation-test" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Trip Test</a>
@@ -249,6 +251,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/globe" element={<Globe3DPage />} />
+          <Route path="/simple-globe" element={<SimpleGlobePage />} />
           <Route path="/debug" element={<Debug />} />
           <Route path="/testing" element={<Testing />} />
           <Route path="/trip-creation-test" element={<TripTest />} />

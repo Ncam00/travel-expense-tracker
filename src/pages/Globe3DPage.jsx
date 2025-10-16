@@ -1,39 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import Globe3D, { convertTripDataFor3D } from '../components/Globe3D';
-import { tripService } from '../services/tripService';
-import { useAuth } from '../context/AuthContext';
 
 export default function Globe3DPage() {
-  const { currentUser } = useAuth();
   const [trips, setTrips] = useState([]);
   const [selectedTrip, setSelectedTrip] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Start with false since we're in demo mode
   const [globeData, setGlobeData] = useState({ locations: [], routes: [] });
   const [timelineMode, setTimelineMode] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  // For now, just show the demo globe without authentication
   useEffect(() => {
-    async function loadTrips() {
-      if (!currentUser) return;
-      
-      try {
-        setLoading(true);
-        const userTrips = await tripService.getTrips(currentUser.uid);
-        setTrips(userTrips);
-        
-        // Convert trip data for 3D visualization
-        const { locations, routes } = convertTripDataFor3D(userTrips);
-        setGlobeData({ locations, routes });
-      } catch (error) {
-        console.error('Error loading trips for 3D globe:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadTrips();
-  }, [currentUser]);
+    // Set some demo data or leave empty for beautiful empty globe
+    setTrips([]);
+    setGlobeData({ locations: [], routes: [] });
+    setLoading(false);
+  }, []);
 
   // Timeline animation
   useEffect(() => {
@@ -72,17 +55,6 @@ export default function Globe3DPage() {
     setCurrentTime(0);
     setIsPlaying(false);
   };
-
-  if (!currentUser) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <h2 className="text-2xl font-bold mb-4">Please log in to view your 3D travel globe</h2>
-          <p className="text-gray-300">Sign in to see your amazing travel history visualized in 3D!</p>
-        </div>
-      </div>
-    );
-  }
 
   if (loading) {
     return (
