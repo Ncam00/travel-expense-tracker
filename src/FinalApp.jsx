@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Globe3DPage from './pages/Globe3DPage';
+import ExpenseTrackingPage from './pages/ExpenseTrackingPage';
 import SimpleGlobePage from './pages/SimpleGlobePage';
 
 // Clean React components
@@ -64,7 +64,7 @@ const Home = () => {
                   <p className="text-gray-600 text-sm mb-4">
                     Visualize your travel history on an interactive 3D Earth
                   </p>
-                  <a href="/globe" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                  <a href="/expense-tracking" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
                     Explore Globe →
                   </a>
                 </div>
@@ -175,16 +175,16 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-2">
+            <a href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer">
               <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center">
                 <span className="text-white text-sm">🌍</span>
               </div>
               <h1 className="text-lg font-semibold">Travel Tracker</h1>
-            </div>
+            </a>
             <div className="hidden md:flex space-x-6">
               <a href="/" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Home</a>
-              <a href="/globe" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">🌍 3D Globe</a>
-              <a href="/simple-globe" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">🔵 Simple Globe</a>
+              <a href="/expense-tracking" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Expense Tracking</a>
+              <a href="/travel-globe" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Travel Globe</a>
               <a href="/debug" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Debug</a>
               <a href="/testing" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Testing</a>
               <a href="/trip-creation-test" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Trip Test</a>
@@ -233,7 +233,7 @@ const Login = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">🔐 Login</h1>
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">Login</h1>
         <p className="text-gray-600 text-lg mb-8">Authentication system coming soon...</p>
         <div className="bg-green-50 rounded-lg p-6 max-w-2xl mx-auto">
           <p className="text-green-800">Firebase authentication will be integrated here.</p>
@@ -250,8 +250,8 @@ const App = () => {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/globe" element={<Globe3DPage />} />
-          <Route path="/simple-globe" element={<SimpleGlobePage />} />
+          <Route path="/expense-tracking" element={<ExpenseTrackingPage />} />
+          <Route path="/travel-globe" element={<SimpleGlobePage />} />
           <Route path="/debug" element={<Debug />} />
           <Route path="/testing" element={<Testing />} />
           <Route path="/trip-creation-test" element={<TripTest />} />

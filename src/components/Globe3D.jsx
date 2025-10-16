@@ -3,23 +3,42 @@ import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import { OrbitControls, Stars, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
-// Earth component with realistic texture
-function Earth({ locations = [], selectedTrip = null, onLocationClick = () => {} }) {
+// Realistic Earth component with smart rotation to showcase destinations
+function RealisticEarth({ locations = [], selectedTrip = null, onLocationClick = () => {} }) {
   const earthRef = useRef();
+  const [targetRotation, setTargetRotation] = useState(0);
+  const [currentLocationIndex, setCurrentLocationIndex] = useState(0);
   
-  // Load realistic Earth texture with Suspense handling
-  let earthTexture;
-  try {
-    earthTexture = useLoader(THREE.TextureLoader, 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
-  } catch (error) {
-    console.log('Earth texture loading failed, using blue fallback');
-    earthTexture = null;
-  }
+  // Load realistic Earth texture
+  const earthTexture = useLoader(THREE.TextureLoader, 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
   
-  // Rotate the Earth slowly
-  useFrame(() => {
+  // Smart rotation to showcase destinations
+  useFrame((state) => {
     if (earthRef.current) {
-      earthRef.current.rotation.y += 0.002;
+      if (locations.length > 0) {
+        // Rotate to showcase different destinations over time
+        const rotationSpeed = 0.001;
+        const showcaseInterval = 8000; // 8 seconds per destination
+        const currentTime = state.clock.elapsedTime * 1000;
+        const locationIndex = Math.floor(currentTime / showcaseInterval) % locations.length;
+        
+        if (locationIndex !== currentLocationIndex) {
+          setCurrentLocationIndex(locationIndex);
+          // Calculate rotation to show the current destination
+          const location = locations[locationIndex];
+          const targetY = -((location.lng + 180) * Math.PI) / 180;
+          setTargetRotation(targetY);
+        }
+        
+        // Smooth rotation towards target
+        const currentY = earthRef.current.rotation.y;
+        const diff = targetRotation - currentY;
+        const shortestDiff = ((diff + Math.PI) % (2 * Math.PI)) - Math.PI;
+        earthRef.current.rotation.y += shortestDiff * 0.02;
+      } else {
+        // Default slow rotation when no destinations
+        earthRef.current.rotation.y += 0.002;
+      }
     }
   });
 
@@ -28,15 +47,68 @@ function Earth({ locations = [], selectedTrip = null, onLocationClick = () => {}
       {/* Earth sphere with realistic texture */}
       <mesh ref={earthRef} position={[0, 0, 0]}>
         <sphereGeometry args={[2, 64, 64]} />
-        {earthTexture ? (
-          <meshLambertMaterial map={earthTexture} />
-        ) : (
-          <meshLambertMaterial 
-            color="#2563eb"
-            transparent
-            opacity={0.9}
-          />
-        )}
+        <meshLambertMaterial map={earthTexture} />
+      </mesh>
+      
+      {/* Location pins */}
+      {locations.map((location, index) => (
+        <LocationPin 
+          key={`${location.lat}-${location.lng}-${location.tripId}-${index}`} 
+          location={location} 
+          index={index}
+          isSelected={selectedTrip === location.tripId}
+          onClick={() => onLocationClick(location)}
+        />
+      ))}
+    </group>
+  );
+}
+
+// Fallback Earth component with smart rotation while texture loads
+function BlueEarth({ locations = [], selectedTrip = null, onLocationClick = () => {} }) {
+  const earthRef = useRef();
+  const [targetRotation, setTargetRotation] = useState(0);
+  const [currentLocationIndex, setCurrentLocationIndex] = useState(0);
+  
+  // Smart rotation to showcase destinations
+  useFrame((state) => {
+    if (earthRef.current) {
+      if (locations.length > 0) {
+        // Rotate to showcase different destinations over time
+        const showcaseInterval = 8000; // 8 seconds per destination
+        const currentTime = state.clock.elapsedTime * 1000;
+        const locationIndex = Math.floor(currentTime / showcaseInterval) % locations.length;
+        
+        if (locationIndex !== currentLocationIndex) {
+          setCurrentLocationIndex(locationIndex);
+          // Calculate rotation to show the current destination
+          const location = locations[locationIndex];
+          const targetY = -((location.lng + 180) * Math.PI) / 180;
+          setTargetRotation(targetY);
+        }
+        
+        // Smooth rotation towards target
+        const currentY = earthRef.current.rotation.y;
+        const diff = targetRotation - currentY;
+        const shortestDiff = ((diff + Math.PI) % (2 * Math.PI)) - Math.PI;
+        earthRef.current.rotation.y += shortestDiff * 0.02;
+      } else {
+        // Default slow rotation when no destinations
+        earthRef.current.rotation.y += 0.002;
+      }
+    }
+  });
+
+  return (
+    <group>
+      {/* Earth sphere with blue fallback */}
+      <mesh ref={earthRef} position={[0, 0, 0]}>
+        <sphereGeometry args={[2, 32, 32]} />
+        <meshLambertMaterial 
+          color="#2563eb"
+          transparent
+          opacity={0.9}
+        />
       </mesh>
       
       {/* Location pins */}
@@ -336,12 +408,13 @@ export default function Globe3D({
         
         {/* Earth with Suspense for texture loading */}
         <Suspense fallback={
-          <mesh position={[0, 0, 0]}>
-            <sphereGeometry args={[2, 32, 32]} />
-            <meshLambertMaterial color="#2563eb" transparent opacity={0.9} />
-          </mesh>
+          <BlueEarth 
+            locations={visibleLocations} 
+            selectedTrip={selectedTrip} 
+            onLocationClick={onLocationClick}
+          />
         }>
-          <Earth 
+          <RealisticEarth 
             locations={visibleLocations} 
             selectedTrip={selectedTrip} 
             onLocationClick={onLocationClick}
