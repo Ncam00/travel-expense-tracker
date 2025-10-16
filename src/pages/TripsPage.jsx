@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { tripService } from '../services/tripService';
 import { expenseService } from '../services/expenseService';
 import TripModal from '../components/TripModal';
+import TripSharingModal from '../components/TripSharingModal';
 
 export default function TripsPage() {
   const { user } = useAuth();
@@ -12,6 +13,8 @@ export default function TripsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTrip, setEditingTrip] = useState(null);
   const [filter, setFilter] = useState('all'); // all, active, completed
+  const [sharingTrip, setSharingTrip] = useState(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   useEffect(() => {
     loadTrips();
@@ -78,6 +81,17 @@ export default function TripsPage() {
     } catch (err) {
       setError('Failed to delete trip');
     }
+  };
+
+  const handleShareTrip = (trip) => {
+    setSharingTrip(trip);
+    setIsShareModalOpen(true);
+  };
+
+  const handleCloseShareModal = () => {
+    setIsShareModalOpen(false);
+    setSharingTrip(null);
+    loadTrips(); // Refresh trips to get updated sharing info
   };
 
   const filteredTrips = trips.filter(trip => {
@@ -200,6 +214,13 @@ export default function TripsPage() {
                     </div>
                     <div className="flex space-x-1">
                       <button
+                        onClick={() => handleShareTrip(trip)}
+                        className="text-gray-400 hover:text-green-600 p-1"
+                        title="Share trip"
+                      >
+                        👥
+                      </button>
+                      <button
                         onClick={() => handleEditTrip(trip)}
                         className="text-gray-400 hover:text-blue-600 p-1"
                         title="Edit trip"
@@ -291,6 +312,14 @@ export default function TripsPage() {
         onClose={() => setIsModalOpen(false)}
         onSubmit={loadTrips}
         trip={editingTrip}
+      />
+
+      {/* Trip Sharing Modal */}
+      <TripSharingModal
+        trip={sharingTrip}
+        isOpen={isShareModalOpen}
+        onClose={handleCloseShareModal}
+        onUpdate={loadTrips}
       />
     </div>
   );

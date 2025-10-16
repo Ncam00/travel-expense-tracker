@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { expenseService } from '../services/expenseService';
 import { tripService } from '../services/tripService';
+import { realTimeService } from '../services/realTimeService';
+import { notificationService } from '../services/notificationService';
 import DailySpendingView from '../components/DailySpendingView';
 import LocationPicker from '../components/LocationPicker';
 import TransportModeSelector from '../components/TransportModeSelector';
 import TravelMap from '../components/TravelMap';
+import ActivityFeed from '../components/ActivityFeed';
 import { TRANSPORT_MODES } from '../config/map';
 
 const ExpenseTracker = () => {
@@ -22,7 +25,15 @@ const ExpenseTracker = () => {
   const [category, setCategory] = useState('food');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [activeTab, setActiveTab] = useState('expenses'); // New state for tabs
+  const [activeTab, setActiveTab] = useState('expenses');
+  const [isRealTimeEnabled, setIsRealTimeEnabled] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
+  const unsubscribeRef = useRef(null);
+
+  // Initialize notification service
+  useEffect(() => {
+    notificationService.initialize();
+  }, []);
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -39,24 +50,58 @@ const ExpenseTracker = () => {
     fetchTrips();
   }, [user]);
 
+  // Real-time expense updates
   useEffect(() => {
-    const fetchExpenses = async () => {
-      if (user) {
-        try {
-          const expensesData = await expenseService.getExpenses(user.uid);
-          // Filter by selected trip if one is selected
-          const filteredExpenses = selectedTrip 
-            ? expensesData.filter(expense => expense.tripId === selectedTrip)
-            : expensesData;
-          setExpenses(filteredExpenses);
-        } catch (error) {
-          console.error('Error fetching expenses:', error);
+    if (!user || !selectedTrip || !isRealTimeEnabled) {
+      // Fallback to manual fetch
+      const fetchExpenses = async () => {
+        if (user && selectedTrip) {
+          try {
+            const expensesData = await expenseService.getExpenses(user.uid);
+            const filteredExpenses = expensesData.filter(expense => expense.tripId === selectedTrip);
+            setExpenses(filteredExpenses);
+          } catch (error) {
+            console.error('Error fetching expenses:', error);
+          }
         }
+      };
+      fetchExpenses();
+      return;
+    }
+
+    // Set up real-time subscription
+    const unsubscribe = realTimeService.subscribeToExpenses(selectedTrip, {
+      onExpensesUpdate: (newExpenses) => {
+        setExpenses(newExpenses);
+        setConnectionStatus('connected');
+      },
+      onExpenseChanges: (changes) => {
+        changes.forEach(change => {
+          if (change.type === 'added') {
+            notificationService.showToast(`New expense: ${change.expense.description}`, 'success');
+          } else if (change.type === 'modified') {
+            notificationService.showToast(`Updated expense: ${change.expense.description}`, 'info');
+          } else if (change.type === 'removed') {
+            notificationService.showToast(`Deleted expense: ${change.expense.description}`, 'warning');
+          }
+        });
+      },
+      onError: (error) => {
+        console.error('Real-time expense error:', error);
+        setConnectionStatus('error');
+        notificationService.showToast('Connection error - updates may be delayed', 'error');
+      }
+    });
+
+    unsubscribeRef.current = unsubscribe;
+    setConnectionStatus('connected');
+
+    return () => {
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
       }
     };
-
-    fetchExpenses();
-  }, [user, selectedTrip]);
+  }, [user, selectedTrip, isRealTimeEnabled]);
 
   const handleTripSelect = (tripId) => {
     setSelectedTrip(tripId);
@@ -79,7 +124,7 @@ const ExpenseTracker = () => {
     setSuccess('');
 
     try {
-      await expenseService.addExpense({
+      const newExpense = await expenseService.addExpense({
         tripId: selectedTrip,
         amount: parseFloat(amount),
         description,
@@ -89,6 +134,9 @@ const ExpenseTracker = () => {
         transportMode,
         userId: user.uid,
       });
+
+      // Send notification to trip members
+      await notificationService.sendExpenseNotification(selectedTrip, newExpense, 'added');
 
       setSuccess('Expense added successfully');
       setAmount('');
@@ -159,8 +207,42 @@ const ExpenseTracker = () => {
                 <span>🗺️</span>
                 Map View
               </button>
+              <button
+                onClick={() => setActiveTab('activity')}
+                className={`px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300 flex items-center gap-2 ${
+                  activeTab === 'activity'
+                    ? 'bg-white text-blue-600 shadow-lg transform scale-105'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+                }`}
+              >
+                <span>📋</span>
+                Activity
+                {connectionStatus === 'connected' && (
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse ml-1" />
+                )}
+              </button>
             </div>
           </div>
+          
+          {/* Connection Status Indicator */}
+          {selectedTrip && (
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={() => setIsRealTimeEnabled(!isRealTimeEnabled)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
+                  isRealTimeEnabled 
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <div className={`w-2 h-2 rounded-full ${
+                  connectionStatus === 'connected' ? 'bg-green-500' :
+                  connectionStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500'
+                }`} />
+                {isRealTimeEnabled ? 'Live Updates Enabled' : 'Manual Refresh Mode'}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Tab Content */}
@@ -421,6 +503,31 @@ const ExpenseTracker = () => {
                     ? 'Add some expenses with locations to see them on the map'
                     : 'Select a trip first, then add expenses with locations'
                   }
+                </p>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Activity Feed Tab */}
+        {activeTab === 'activity' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="space-y-8"
+          >
+            {selectedTrip ? (
+              <ActivityFeed 
+                tripId={selectedTrip} 
+                className="w-full"
+              />
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-gray-400 text-6xl mb-4">📋</div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Select a trip to view activity</h3>
+                <p className="text-gray-600">
+                  Choose a trip to see real-time updates from group members
                 </p>
               </div>
             )}

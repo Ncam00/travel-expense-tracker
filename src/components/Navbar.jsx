@@ -45,6 +45,12 @@ const Navbar = () => {
                   🎒 Trips
                 </Link>
                 <Link
+                  to="/join"
+                  className={isActive('/join') ? 'nav-link-active' : 'nav-link'}
+                >
+                  👥 Join Trip
+                </Link>
+                <Link
                   to="/expenses"
                   className={isActive('/expenses') ? 'nav-link-active' : 'nav-link'}
                 >
@@ -61,6 +67,12 @@ const Navbar = () => {
                   className={isActive('/testing') ? 'nav-link-active' : 'nav-link'}
                 >
                   🧪 Testing
+                </Link>
+                <Link
+                  to="/test-trip-creation"
+                  className={isActive('/test-trip-creation') ? 'nav-link-active' : 'nav-link'}
+                >
+                  🎒 Trip Test
                 </Link>
                 <div className="flex items-center gap-3 ml-4 pl-4 border-l border-white/20">
                   <div className="flex items-center gap-2">

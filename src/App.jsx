@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
+import ToastContainer from './components/ToastContainer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
@@ -10,17 +12,24 @@ import TripsPage from './pages/TripsPage';
 import TripDashboard from './pages/TripDashboard';
 import Analytics from './pages/Analytics';
 import TestingPage from './pages/TestingPage';
+import JoinTrip from './pages/JoinTrip';
+import TripCreationTestPage from './pages/TripCreationTestPage';
+import DebugInfo from './pages/DebugInfo';
+import SimpleTest from './pages/SimpleTest';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-100">
-          <Navbar />
-          <Routes>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-100">
+            <Navbar />
+            <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
+            <Route path="/test" element={<SimpleTest />} />
+            <Route path="/debug" element={<DebugInfo />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             
@@ -55,10 +64,24 @@ function App() {
                 <TestingPage />
               </ProtectedRoute>
             } />
+            <Route path="/test-trip-creation" element={
+              <ProtectedRoute>
+                <TripCreationTestPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Trip Sharing Routes */}
+            <Route path="/join" element={<JoinTrip />} />
+            <Route path="/join/:code" element={<JoinTrip />} />
+            <Route path="/invite/:token" element={<JoinTrip />} />
           </Routes>
+          
+          {/* Global Toast Notifications */}
+          <ToastContainer />
         </div>
       </Router>
     </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
