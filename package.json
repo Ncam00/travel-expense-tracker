@@ -11,6 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-three/drei": "^9.88.13",
+    "@react-three/fiber": "^8.15.19",
     "@types/mapbox-gl": "^3.4.1",
     "firebase": "^10.7.1",
     "framer-motion": "^10.16.16",
@@ -19,7 +21,8 @@
     "react-dom": "^18.2.0",
     "react-map-gl": "^8.1.0",
     "react-router-dom": "^6.8.1",
-    "recharts": "^3.2.1"
+    "recharts": "^3.2.1",
+    "three": "^0.158.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
