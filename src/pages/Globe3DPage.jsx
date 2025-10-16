@@ -9,6 +9,9 @@ export default function Globe3DPage() {
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [loading, setLoading] = useState(true);
   const [globeData, setGlobeData] = useState({ locations: [], routes: [] });
+  const [timelineMode, setTimelineMode] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     async function loadTrips() {
@@ -32,11 +35,43 @@ export default function Globe3DPage() {
     loadTrips();
   }, [currentUser]);
 
+  // Timeline animation
+  useEffect(() => {
+    if (isPlaying && timelineMode) {
+      const interval = setInterval(() => {
+        setCurrentTime(prev => {
+          if (prev >= 100) {
+            setIsPlaying(false);
+            return 100;
+          }
+          return prev + 1;
+        });
+      }, 100);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isPlaying, timelineMode]);
+
   const handleLocationClick = (location) => {
     setSelectedTrip(location.tripId);
   };
 
   const selectedTripData = trips.find(trip => trip.id === selectedTrip);
+
+  const toggleTimeline = () => {
+    setTimelineMode(!timelineMode);
+    setCurrentTime(0);
+    setIsPlaying(false);
+  };
+
+  const playTimeline = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  const resetTimeline = () => {
+    setCurrentTime(0);
+    setIsPlaying(false);
+  };
 
   if (!currentUser) {
     return (
@@ -100,6 +135,8 @@ export default function Globe3DPage() {
             routes={globeData.routes}
             selectedTrip={selectedTrip}
             onLocationClick={handleLocationClick}
+            timelineMode={timelineMode}
+            currentTime={currentTime}
             className="w-full h-full"
           />
         ) : (
@@ -119,6 +156,55 @@ export default function Globe3DPage() {
           </div>
         )}
       </div>
+
+      {/* Timeline Controls */}
+      {globeData.locations.length > 0 && (
+        <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-lg rounded-lg p-4 text-white z-20">
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={toggleTimeline}
+              className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                timelineMode 
+                  ? 'bg-purple-600 hover:bg-purple-700' 
+                  : 'bg-gray-600 hover:bg-gray-700'
+              }`}
+            >
+              {timelineMode ? '⏱️ Timeline ON' : '🌍 Show All'}
+            </button>
+            
+            {timelineMode && (
+              <>
+                <button
+                  onClick={playTimeline}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-all"
+                >
+                  {isPlaying ? '⏸️ Pause' : '▶️ Play'}
+                </button>
+                
+                <button
+                  onClick={resetTimeline}
+                  className="px-3 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition-all"
+                >
+                  🔄 Reset
+                </button>
+                
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm">Timeline:</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={currentTime}
+                    onChange={(e) => setCurrentTime(parseInt(e.target.value))}
+                    className="w-32 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <span className="text-sm">{currentTime}%</span>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Trip Details Panel */}
       {selectedTripData && (
@@ -146,12 +232,30 @@ export default function Globe3DPage() {
 
       {/* Controls Legend */}
       <div className="fixed top-20 right-6 bg-white/10 backdrop-blur-lg rounded-lg p-4 text-white text-sm z-20">
-        <h4 className="font-semibold mb-2">Globe Controls</h4>
+        <h4 className="font-semibold mb-2">🌍 Globe Controls</h4>
         <div className="space-y-1">
           <div>🖱️ <span className="text-gray-300">Click & drag to rotate</span></div>
           <div>🔍 <span className="text-gray-300">Scroll to zoom</span></div>
           <div>📍 <span className="text-gray-300">Hover pins for details</span></div>
           <div>✨ <span className="text-gray-300">Click pins to select trip</span></div>
+          <div>⏱️ <span className="text-gray-300">Timeline mode replays journeys</span></div>
+        </div>
+        
+        <h4 className="font-semibold mb-2 mt-4">🚗 Transport Modes</h4>
+        <div className="space-y-1">
+          <div><span className="text-blue-400">●</span> <span className="text-gray-300">Plane</span></div>
+          <div><span className="text-red-400">●</span> <span className="text-gray-300">Train</span></div>
+          <div><span className="text-yellow-400">●</span> <span className="text-gray-300">Car</span></div>
+          <div><span className="text-green-400">●</span> <span className="text-gray-300">Boat</span></div>
+          <div><span className="text-purple-400">●</span> <span className="text-gray-300">Bus</span></div>
+        </div>
+        
+        <h4 className="font-semibold mb-2 mt-4">💰 Spending Levels</h4>
+        <div className="space-y-1">
+          <div><span className="text-red-400">●</span> <span className="text-gray-300">High ($5000+)</span></div>
+          <div><span className="text-orange-400">●</span> <span className="text-gray-300">Medium ($2000+)</span></div>
+          <div><span className="text-green-400">●</span> <span className="text-gray-300">Low ($500+)</span></div>
+          <div><span className="text-teal-400">●</span> <span className="text-gray-300">Minimal</span></div>
         </div>
       </div>
     </div>
