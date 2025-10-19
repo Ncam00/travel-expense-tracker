@@ -34,7 +34,7 @@ const Home = () => {
                   <p className="text-gray-600 text-sm mb-4">
                     Log and categorize your travel expenses with location data
                   </p>
-                  <a href="/testing" className="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                  <a href="/expense-tracking" className="text-blue-600 hover:text-blue-700 font-medium text-sm transition-colors">
                     Start Tracking →
                   </a>
                 </div>
@@ -185,9 +185,10 @@ const Navbar = () => {
               <a href="/" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Home</a>
               <a href="/expense-tracking" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Expense Tracking</a>
               <a href="/travel-globe" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Travel Globe</a>
-              <a href="/debug" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Debug</a>
+              {/* Development tabs - hidden in production */}
+              {/* <a href="/debug" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Debug</a>
               <a href="/testing" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Testing</a>
-              <a href="/trip-creation-test" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Trip Test</a>
+              <a href="/trip-creation-test" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Trip Test</a> */}
             </div>
           </div>
           <div className="flex space-x-4">
