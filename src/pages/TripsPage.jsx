@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { tripService } from '../services/tripService';
 import { expenseService } from '../services/expenseService';
@@ -7,6 +8,7 @@ import TripSharingModal from '../components/TripSharingModal';
 
 export default function TripsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -299,6 +301,22 @@ export default function TripsPage() {
                       </p>
                     </div>
                   )}
+
+                  {/* Action Buttons */}
+                  <div className="mt-4 pt-4 border-t flex flex-wrap gap-2">
+                    <button
+                      onClick={() => navigate(`/trips/${trip.id}`)}
+                      className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    >
+                      📊 View Dashboard
+                    </button>
+                    <button
+                      onClick={() => navigate(`/trips/${trip.id}/planning`)}
+                      className="flex-1 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                    >
+                      🗺️ Plan Trip
+                    </button>
+                  </div>
                 </div>
               </div>
             );

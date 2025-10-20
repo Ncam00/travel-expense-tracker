@@ -18,7 +18,7 @@ const initializeFirebase = async () => {
   }
 };
 
-const AuthContext = createContext();
+const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -31,16 +31,20 @@ export function AuthProvider({ children }) {
     
     const setupAuth = async () => {
       try {
+        console.log('Setting up auth...');
         const { auth, firebaseAuth } = await initializeFirebase();
         
         if (auth && firebaseAuth) {
+          console.log('Firebase initialized successfully');
           unsubscribe = auth.onAuthStateChanged(firebaseAuth, (user) => {
+            console.log('Auth state changed:', user?.email || 'No user');
             setUser(user);
             setLoading(false);
             setError(null);
           });
         } else {
           // Firebase failed to initialize
+          console.error('Firebase failed to initialize');
           setLoading(false);
           setError('Firebase authentication not available');
           setRenderFallback(true);
@@ -120,24 +124,12 @@ export function AuthProvider({ children }) {
     error
   };
 
-  // Show error fallback if Firebase fails to initialize
-  if (error && !loading) {
-    console.warn('AuthContext error:', error);
-    // Still provide context but with error state
-  }
+  console.log('AuthProvider rendering, loading:', loading, 'user:', user?.email || 'none');
 
-  // Force render after timeout or if we have an error
-  if (renderFallback) {
-    return (
-      <AuthContext.Provider value={value}>
-        {children}
-      </AuthContext.Provider>
-    );
-  }
-
+  // Always provide the context, even during loading
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }

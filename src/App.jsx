@@ -10,6 +10,9 @@ import Dashboard from './pages/Dashboard';
 import ExpenseTracker from './pages/ExpenseTracker';
 import TripsPage from './pages/TripsPage';
 import TripDashboard from './pages/TripDashboard';
+import TripPlanningPage from './pages/TripPlanningPage';
+import SimpleGlobePage from './pages/SimpleGlobePage';
+import TestGlobePage from './pages/TestGlobePage';
 import Analytics from './pages/Analytics';
 import TestingPage from './pages/TestingPage';
 import JoinTrip from './pages/JoinTrip';
@@ -49,6 +52,11 @@ function App() {
                 <TripDashboard />
               </ProtectedRoute>
             } />
+            <Route path="/trips/:tripId/planning" element={
+              <ProtectedRoute>
+                <TripPlanningPage />
+              </ProtectedRoute>
+            } />
             <Route path="/expenses" element={
               <ProtectedRoute>
                 <ExpenseTracker />
@@ -57,6 +65,16 @@ function App() {
             <Route path="/analytics" element={
               <ProtectedRoute>
                 <Analytics />
+              </ProtectedRoute>
+            } />
+            <Route path="/travel-globe" element={
+              <ProtectedRoute>
+                <TestGlobePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/travel-globe-full" element={
+              <ProtectedRoute>
+                <SimpleGlobePage />
               </ProtectedRoute>
             } />
             <Route path="/testing" element={

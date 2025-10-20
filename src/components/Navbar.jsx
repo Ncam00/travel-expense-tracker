@@ -63,6 +63,12 @@ const Navbar = () => {
                   📈 Analytics
                 </Link>
                 <Link
+                  to="/travel-globe"
+                  className={isActive('/travel-globe') ? 'nav-link-active' : 'nav-link'}
+                >
+                  🌍 Globe
+                </Link>
+                <Link
                   to="/testing"
                   className={isActive('/testing') ? 'nav-link-active' : 'nav-link'}
                 >
