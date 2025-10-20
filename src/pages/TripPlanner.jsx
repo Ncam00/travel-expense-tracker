@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { tripService } from '../services/tripService';
+import { CURRENCIES } from '../services/currencyService';
 
 const TripPlanner = () => {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ const TripPlanner = () => {
     startDate: '',
     endDate: '',
     budget: '',
+    currency: 'USD',
     description: ''
   });
 
@@ -78,6 +80,7 @@ const TripPlanner = () => {
         startDate: '',
         endDate: '',
         budget: '',
+        currency: 'USD',
         description: ''
       });
       setShowForm(false);
@@ -96,6 +99,7 @@ const TripPlanner = () => {
       startDate: trip.startDate,
       endDate: trip.endDate,
       budget: trip.budget.toString(),
+      currency: trip.currency || 'USD',
       description: trip.description || ''
     });
     setEditingTrip(trip);
@@ -122,6 +126,7 @@ const TripPlanner = () => {
       startDate: '',
       endDate: '',
       budget: '',
+      currency: 'USD',
       description: ''
     });
     setShowForm(false);
@@ -241,6 +246,25 @@ const TripPlanner = () => {
                   placeholder="0.00"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Currency *
+                </label>
+                <select
+                  name="currency"
+                  value={formData.currency}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  {CURRENCIES.map(currency => (
+                    <option key={currency.code} value={currency.code}>
+                      {currency.code} - {currency.name} ({currency.symbol})
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
