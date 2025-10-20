@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where, orderBy, getDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,6 +12,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // Expense Service
 export const expenseService = {
@@ -81,6 +83,28 @@ export const expenseService = {
       }));
     } catch (error) {
       console.error('Error getting trip expenses:', error);
+      throw error;
+    }
+  },
+
+  async uploadReceipt(file, expenseId) {
+    try {
+      const storageRef = ref(storage, `receipts/${expenseId}/${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error uploading receipt:', error);
+      throw error;
+    }
+  },
+
+  async deleteReceipt(receiptURL) {
+    try {
+      const receiptRef = ref(storage, receiptURL);
+      await deleteObject(receiptRef);
+    } catch (error) {
+      console.error('Error deleting receipt:', error);
       throw error;
     }
   }
@@ -158,4 +182,4 @@ export const tripService = {
   }
 };
 
-export { auth, db };
+export { auth, db, storage };
