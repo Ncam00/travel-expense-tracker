@@ -1,17 +1,136 @@
 import React, { useState, useEffect } from 'react';
 import Globe3D from '../components/Globe3D';
+import { useAuth } from '../context/AuthContext';
+import { tripService } from '../services/tripService';
+import { expenseService } from '../services/expenseService';
 
 export default function SimpleGlobePage() {
+  const { user } = useAuth();
   const [trips, setTrips] = useState([]);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [globeData, setGlobeData] = useState({ locations: [], routes: [] });
   const [timelineMode, setTimelineMode] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample travel data for globe demonstration
+  // Load real travel data from Firebase
   useEffect(() => {
-    const sampleTrips = [
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    loadTravelData();
+  }, [user]);
+
+  const loadTravelData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch trips and expenses in parallel
+      const [userTrips, userExpenses] = await Promise.all([
+        tripService.getTrips(user.uid),
+        expenseService.getExpenses(user.uid)
+      ]);
+
+      // Group expenses by trip and location
+      const tripExpensesMap = {};
+      userExpenses.forEach(expense => {
+        if (!expense.location || !expense.location.coordinates) {
+          return; // Skip expenses without location data
+        }
+
+        const tripId = expense.tripId;
+        if (!tripExpensesMap[tripId]) {
+          tripExpensesMap[tripId] = [];
+        }
+        tripExpensesMap[tripId].push(expense);
+      });
+
+      // Process trips and create globe data
+      const locations = [];
+      const routes = [];
+      const processedTrips = [];
+
+      userTrips.forEach(trip => {
+        const tripExpenses = tripExpensesMap[trip.id] || [];
+        if (tripExpenses.length === 0) {
+          return; // Skip trips without located expenses
+        }
+
+        // Sort expenses by date
+        tripExpenses.sort((a, b) => {
+          const dateA = a.date?.seconds ? a.date.seconds * 1000 : new Date(a.date).getTime();
+          const dateB = b.date?.seconds ? b.date.seconds * 1000 : new Date(b.date).getTime();
+          return dateA - dateB;
+        });
+
+        // Aggregate spending by location
+        const locationSpendingMap = {};
+        tripExpenses.forEach(expense => {
+          const coords = expense.location.coordinates;
+          const key = `${coords.lat},${coords.lng}`;
+          
+          if (!locationSpendingMap[key]) {
+            locationSpendingMap[key] = {
+              lat: coords.lat,
+              lng: coords.lng,
+              name: expense.location.name || 'Unknown Location',
+              totalSpent: 0,
+              tripId: trip.id,
+              tripName: trip.name,
+              transportMode: expense.transportMode || 'plane',
+              date: expense.date,
+              expenses: []
+            };
+          }
+          
+          locationSpendingMap[key].totalSpent += Number(expense.amount || 0);
+          locationSpendingMap[key].expenses.push(expense);
+        });
+
+        // Convert to array and add to locations
+        const tripLocations = Object.values(locationSpendingMap);
+        tripLocations.forEach((location, index) => {
+          locations.push(location);
+          
+          // Create routes between consecutive locations
+          if (index > 0) {
+            routes.push({
+              from: tripLocations[index - 1],
+              to: location,
+              tripId: trip.id,
+              tripName: trip.name,
+              transportMode: location.transportMode || 'plane'
+            });
+          }
+        });
+
+        processedTrips.push({
+          ...trip,
+          destinations: tripLocations
+        });
+      });
+
+      console.log(`Loaded ${userTrips.length} trips, ${userExpenses.length} expenses, ${locations.length} locations`);
+      
+      setTrips(processedTrips);
+      setGlobeData({ locations, routes });
+    } catch (err) {
+      console.error('Error loading travel data:', err);
+      setError(err.message || 'Failed to load travel data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fallback to sample data if no user logged in or no data
+  useEffect(() => {
+    if (!user || (trips.length === 0 && !loading && !error)) {
+      const sampleTrips = [
       {
         id: 'trip-1',
         name: "European Adventure",
@@ -65,9 +184,13 @@ export default function SimpleGlobePage() {
       });
     });
 
-    setTrips(sampleTrips);
-    setGlobeData({ locations, routes });
-  }, []);
+      // Only use sample data if we have no real data
+      if (!loading && trips.length === 0 && !user) {
+        setTrips(sampleTrips);
+        setGlobeData({ locations, routes });
+      }
+    }
+  }, [user, trips.length, loading]);
 
   // Timeline animation
   useEffect(() => {
@@ -105,35 +228,101 @@ export default function SimpleGlobePage() {
     setIsPlaying(false);
   };
 
+  // Show login prompt if no user
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <span className="text-6xl mb-4 block">🌍</span>
+          <h2 className="text-3xl font-bold text-white mb-4">Travel Globe</h2>
+          <p className="text-gray-300 mb-6">Sign in to see your travel history visualized in 3D</p>
+          <a href="/login" className="btn-primary">Sign In</a>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
-      <div className="relative z-10 p-6">
+      <div className="relative z-10 p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Your Travel Globe
-          </h1>
-          <p className="text-gray-300 mb-6">
-            Explore your adventures on an interactive 3D globe
-          </p>
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+                Your Travel Globe 🌍
+              </h1>
+              <p className="text-gray-300 text-sm sm:text-base">
+                {loading ? 'Loading your adventures...' : 
+                 error ? 'Error loading data' :
+                 globeData.locations.length > 0 ? `${globeData.locations.length} locations across ${trips.length} trips` :
+                 'No travel data yet - start tracking your first trip!'}
+              </p>
+            </div>
+            
+            {!loading && !error && globeData.locations.length === 0 && (
+              <a href="/trips" className="btn-secondary text-sm">
+                Create Your First Trip
+              </a>
+            )}
+            
+            {!loading && globeData.locations.length > 0 && (
+              <button
+                onClick={() => loadTravelData()}
+                className="text-white/80 hover:text-white px-3 py-2 rounded-lg hover:bg-white/10 transition-colors text-sm"
+                title="Refresh data"
+              >
+                🔄 Refresh
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Globe Container */}
-      <div className="relative h-[80vh]">
-        <Globe3D
-          locations={globeData.locations}
-          routes={globeData.routes}
-          selectedTrip={selectedTrip}
-          onLocationClick={handleLocationClick}
-          timelineMode={timelineMode}
-          currentTime={currentTime}
-          className="w-full h-full"
-        />
-      </div>
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center h-[80vh]">
+          <div className="text-center">
+            <div className="animate-spin text-6xl mb-4">🌍</div>
+            <p className="text-white text-lg">Loading your travel data...</p>
+          </div>
+        </div>
+      )}
 
-      {/* Timeline Controls */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-lg rounded-lg p-4 text-white z-20">
+      {/* Error State */}
+      {error && !loading && (
+        <div className="flex items-center justify-center h-[80vh]">
+          <div className="text-center bg-red-500/20 border border-red-500 rounded-lg p-8 max-w-md">
+            <span className="text-4xl mb-4 block">⚠️</span>
+            <h3 className="text-xl font-semibold text-white mb-2">Error Loading Data</h3>
+            <p className="text-red-200 mb-4">{error}</p>
+            <button
+              onClick={() => loadTravelData()}
+              className="btn-primary"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Globe Container - Only show when data is loaded */}
+      {!loading && !error && (
+        <>
+          <div className="relative h-[80vh]">
+            <Globe3D
+              locations={globeData.locations}
+              routes={globeData.routes}
+              selectedTrip={selectedTrip}
+              onLocationClick={handleLocationClick}
+              timelineMode={timelineMode}
+              currentTime={currentTime}
+              className="w-full h-full"
+            />
+          </div>
+
+          {/* Timeline Controls */}
+          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-lg rounded-lg p-4 text-white z-20">
         <div className="flex items-center space-x-4">
           <button
             onClick={toggleTimeline}
@@ -179,17 +368,19 @@ export default function SimpleGlobePage() {
         </div>
       </div>
 
-      {/* Controls Info */}
-      <div className="fixed top-20 right-6 bg-white/10 backdrop-blur-lg rounded-lg p-4 text-white text-sm z-20">
-        <h4 className="font-semibold mb-2">🌍 Globe Controls</h4>
-        <div className="space-y-1">
-          <div>🖱️ <span className="text-gray-300">Drag to rotate</span></div>
-          <div>🔍 <span className="text-gray-300">Scroll to zoom</span></div>
-          <div>📍 <span className="text-gray-300">Hover pins for details</span></div>
-          <div>✨ <span className="text-gray-300">Click pins to select trip</span></div>
-          <div>⏱️ <span className="text-gray-300">Timeline mode replays journeys</span></div>
-        </div>
-      </div>
+          {/* Controls Info */}
+          <div className="fixed top-20 right-6 bg-white/10 backdrop-blur-lg rounded-lg p-4 text-white text-sm z-20 hidden lg:block">
+            <h4 className="font-semibold mb-2">🌍 Globe Controls</h4>
+            <div className="space-y-1">
+              <div>🖱️ <span className="text-gray-300">Drag to rotate</span></div>
+              <div>🔍 <span className="text-gray-300">Scroll to zoom</span></div>
+              <div>📍 <span className="text-gray-300">Hover pins for details</span></div>
+              <div>✨ <span className="text-gray-300">Click pins to select trip</span></div>
+              <div>⏱️ <span className="text-gray-300">Timeline mode replays journeys</span></div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
