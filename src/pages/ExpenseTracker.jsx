@@ -11,6 +11,7 @@ import TransportModeSelector from '../components/TransportModeSelector';
 import TravelMap from '../components/TravelMap';
 import ActivityFeed from '../components/ActivityFeed';
 import { TRANSPORT_MODES } from '../config/map';
+import { exportExpensesToCSV } from '../utils/csvExport';
 
 const ExpenseTracker = () => {
   const { user } = useAuth();
@@ -224,9 +225,9 @@ const ExpenseTracker = () => {
             </div>
           </div>
           
-          {/* Connection Status Indicator */}
+          {/* Connection Status Indicator & Export Button */}
           {selectedTrip && (
-            <div className="flex justify-center mt-4">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-3 mt-4">
               <button
                 onClick={() => setIsRealTimeEnabled(!isRealTimeEnabled)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all ${
@@ -241,6 +242,27 @@ const ExpenseTracker = () => {
                 }`} />
                 {isRealTimeEnabled ? 'Live Updates Enabled' : 'Manual Refresh Mode'}
               </button>
+              
+              {expenses.length > 0 && (
+                <button
+                  onClick={() => {
+                    try {
+                      const selectedTripData = trips.find(t => t.id === selectedTrip);
+                      exportExpensesToCSV(
+                        expenses,
+                        `${selectedTripData?.name || 'trip'}_expenses_${new Date().toISOString().split('T')[0]}.csv`
+                      );
+                    } catch (err) {
+                      setError('Failed to export expenses');
+                      setTimeout(() => setError(''), 3000);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-medium transition-all bg-blue-100 text-blue-700 hover:bg-blue-200"
+                  title="Export expenses as CSV"
+                >
+                  📊 Export to CSV
+                </button>
+              )}
             </div>
           )}
         </div>

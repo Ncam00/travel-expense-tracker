@@ -4,6 +4,8 @@ import { tripService } from '../services/tripService';
 import { expenseService } from '../services/expenseService';
 import TripModal from '../components/TripModal';
 import TripSharingModal from '../components/TripSharingModal';
+import { generateTripPDF } from '../utils/pdfExport';
+import { exportExpensesToCSV, exportTripSummaryToCSV } from '../utils/csvExport';
 
 export default function TripsPage() {
   const { user } = useAuth();
@@ -92,6 +94,63 @@ export default function TripsPage() {
     setIsShareModalOpen(false);
     setSharingTrip(null);
     loadTrips(); // Refresh trips to get updated sharing info
+  };
+
+  const handleExportPDF = async (trip) => {
+    try {
+      // Get expenses for this trip
+      const allExpenses = await expenseService.getExpenses(user.uid);
+      const tripExpenses = allExpenses.filter(exp => exp.tripId === trip.id);
+      
+      // Generate PDF
+      const result = generateTripPDF(trip, tripExpenses, trip.members || []);
+      
+      // Show success message (you could add a toast notification here)
+      console.log('PDF exported successfully:', result.fileName);
+    } catch (err) {
+      console.error('Failed to export PDF:', err);
+      alert('Failed to export PDF. Please try again.');
+    }
+  };
+
+  const handleExportCSV = async (trip) => {
+    try {
+      // Get expenses for this trip
+      const allExpenses = await expenseService.getExpenses(user.uid);
+      const tripExpenses = allExpenses.filter(exp => exp.tripId === trip.id);
+      
+      // Generate CSV
+      const result = exportTripSummaryToCSV(trip, tripExpenses, trip.members || []);
+      
+      console.log('CSV exported successfully:', result.fileName);
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+      alert('Failed to export CSV. Please try again.');
+    }
+  };
+
+  const handleExportExpensesCSV = async (trip) => {
+    try {
+      // Get expenses for this trip
+      const allExpenses = await expenseService.getExpenses(user.uid);
+      const tripExpenses = allExpenses.filter(exp => exp.tripId === trip.id);
+      
+      if (tripExpenses.length === 0) {
+        alert('No expenses to export for this trip.');
+        return;
+      }
+      
+      // Generate CSV
+      const result = exportExpensesToCSV(
+        tripExpenses,
+        `${trip.name}_expenses_${new Date().toISOString().split('T')[0]}.csv`
+      );
+      
+      console.log('Expenses CSV exported successfully:', result.fileName);
+    } catch (err) {
+      console.error('Failed to export expenses CSV:', err);
+      alert('Failed to export expenses. Please try again.');
+    }
   };
 
   const filteredTrips = trips.filter(trip => {
@@ -297,6 +356,36 @@ export default function TripsPage() {
                       <p className="text-sm text-gray-600 line-clamp-2">
                         {trip.description}
                       </p>
+                    </div>
+                  )}
+
+                  {/* Export Buttons */}
+                  {trip.expenseCount > 0 && (
+                    <div className="mt-4 pt-4 border-t">
+                      <p className="text-xs text-gray-500 mb-2 font-medium">📊 Export Data:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          onClick={() => handleExportPDF(trip)}
+                          className="flex-1 min-w-[100px] text-xs bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-lg transition-colors border border-red-200 flex items-center justify-center gap-1"
+                          title="Export full trip report as PDF"
+                        >
+                          📄 PDF Report
+                        </button>
+                        <button
+                          onClick={() => handleExportCSV(trip)}
+                          className="flex-1 min-w-[100px] text-xs bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg transition-colors border border-green-200 flex items-center justify-center gap-1"
+                          title="Export trip summary as CSV"
+                        >
+                          📊 Summary CSV
+                        </button>
+                        <button
+                          onClick={() => handleExportExpensesCSV(trip)}
+                          className="flex-1 min-w-[100px] text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg transition-colors border border-blue-200 flex items-center justify-center gap-1"
+                          title="Export expenses as CSV"
+                        >
+                          💰 Expenses CSV
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
