@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { expenseService } from '../services/expenseService';
+import { expenseService as firebaseExpenseService } from '../config/firebase';
 import { tripService } from '../services/tripService';
 import { realTimeService } from '../services/realTimeService';
 import { notificationService } from '../services/notificationService';
@@ -23,6 +24,9 @@ const ExpenseTracker = () => {
   const [location, setLocation] = useState(null);
   const [transportMode, setTransportMode] = useState('');
   const [category, setCategory] = useState('food');
+  const [receiptFile, setReceiptFile] = useState(null);
+  const [receiptPreview, setReceiptPreview] = useState(null);
+  const [uploadingReceipt, setUploadingReceipt] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('expenses');
@@ -107,6 +111,37 @@ const ExpenseTracker = () => {
     setSelectedTrip(tripId);
   };
 
+  const handleReceiptChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        return;
+      }
+
+      setReceiptFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setReceiptPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveReceipt = () => {
+    setReceiptFile(null);
+    setReceiptPreview(null);
+  };
+
   const handleAddExpense = async (e) => {
     e.preventDefault();
 
@@ -122,9 +157,11 @@ const ExpenseTracker = () => {
 
     setError('');
     setSuccess('');
+    setUploadingReceipt(!!receiptFile);
 
     try {
-      const newExpense = await expenseService.addExpense({
+      // First, add the expense
+      const expenseId = await expenseService.addExpense({
         tripId: selectedTrip,
         amount: parseFloat(amount),
         description,
@@ -135,16 +172,32 @@ const ExpenseTracker = () => {
         userId: user.uid,
       });
 
-      // Send notification to trip members
-      await notificationService.sendExpenseNotification(selectedTrip, newExpense, 'added');
+      // Upload receipt if provided
+      let receiptURL = null;
+      if (receiptFile) {
+        try {
+          receiptURL = await firebaseExpenseService.uploadReceipt(receiptFile, expenseId);
+          // Update expense with receipt URL
+          await expenseService.updateExpense(expenseId, { receiptURL });
+        } catch (uploadError) {
+          console.error('Error uploading receipt:', uploadError);
+          setError('Expense added but receipt upload failed');
+        }
+      }
 
-      setSuccess('Expense added successfully');
+      // Send notification to trip members
+      await notificationService.sendExpenseNotification(selectedTrip, { id: expenseId, description, amount, receiptURL }, 'added');
+
+      setSuccess(receiptFile ? 'Expense and receipt added successfully' : 'Expense added successfully');
       setAmount('');
       setDescription('');
       setDate('');
       setLocation(null);
       setTransportMode('');
       setCategory('food');
+      setReceiptFile(null);
+      setReceiptPreview(null);
+      setUploadingReceipt(false);
       
       // Refresh expenses
       const expensesData = await expenseService.getExpenses(user.uid);
@@ -399,11 +452,53 @@ const ExpenseTracker = () => {
                     />
                   </div>
 
+                  {/* Receipt Upload */}
+                  <div className="form-group">
+                    <label className="form-label">
+                      📸 Receipt Photo (Optional)
+                    </label>
+                    {!receiptPreview ? (
+                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleReceiptChange}
+                          className="hidden"
+                          id="receipt-upload"
+                        />
+                        <label htmlFor="receipt-upload" className="cursor-pointer">
+                          <div className="text-4xl mb-2">📷</div>
+                          <div className="text-gray-600 mb-2">Click to upload receipt</div>
+                          <div className="text-xs text-gray-500">PNG, JPG up to 5MB</div>
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="relative border-2 border-gray-200 rounded-xl p-4">
+                        <img
+                          src={receiptPreview}
+                          alt="Receipt preview"
+                          className="w-full h-48 object-contain rounded-lg mb-2"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleRemoveReceipt}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                        >
+                          ✕
+                        </button>
+                        <div className="text-sm text-gray-600 text-center">
+                          {receiptFile?.name}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <button
                     type="submit"
                     className="btn-primary w-full"
+                    disabled={uploadingReceipt}
                   >
-                    ✨ Add Expense
+                    {uploadingReceipt ? '📤 Uploading Receipt...' : '✨ Add Expense'}
                   </button>
                 </form>
               </motion.div>
