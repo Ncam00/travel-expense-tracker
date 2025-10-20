@@ -137,6 +137,10 @@ export default function Analytics() {
     );
   }
 
+  const overBudgetTrips = analytics.budgetVsActual.filter(trip => trip.spent > trip.budget);
+  const underBudgetTrips = analytics.budgetVsActual.filter(trip => trip.budget > 0 && trip.spent < trip.budget);
+  const totalSavings = underBudgetTrips.reduce((sum, trip) => sum + (trip.budget - trip.spent), 0);
+
   return (
     <div className="max-w-7xl mx-auto p-4 space-y-8">
       <div className="flex justify-between items-center">
@@ -146,21 +150,106 @@ export default function Analytics() {
         </div>
       </div>
 
+      {/* Alert Banners */}
+      {(overBudgetTrips.length > 0 || underBudgetTrips.length > 0) && (
+        <div className="grid md:grid-cols-2 gap-4">
+          {overBudgetTrips.length > 0 && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+              <div className="flex items-start">
+                <span className="text-2xl mr-3">🚨</span>
+                <div>
+                  <h3 className="font-semibold text-red-900">Over Budget Alert</h3>
+                  <p className="text-sm text-red-700 mt-1">
+                    {overBudgetTrips.length} trip{overBudgetTrips.length > 1 ? 's' : ''} exceeded budget
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-red-800">
+                    {overBudgetTrips.slice(0, 2).map((trip, idx) => (
+                      <li key={idx}>
+                        • {trip.name}: ${(trip.spent - trip.budget).toFixed(2)} over
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {underBudgetTrips.length > 0 && (
+            <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+              <div className="flex items-start">
+                <span className="text-2xl mr-3">💰</span>
+                <div>
+                  <h3 className="font-semibold text-green-900">Savings Report</h3>
+                  <p className="text-sm text-green-700 mt-1">
+                    Total saved: ${totalSavings.toFixed(2)} across {underBudgetTrips.length} trip{underBudgetTrips.length > 1 ? 's' : ''}
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm text-green-800">
+                    {underBudgetTrips.slice(0, 2).map((trip, idx) => (
+                      <li key={idx}>
+                        • {trip.name}: ${(trip.budget - trip.spent).toFixed(2)} saved
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="grid lg:grid-cols-2 gap-8">
-        {/* Budget vs Actual */}
+        {/* Budget vs Actual with Progress Bars */}
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h2 className="text-xl font-semibold mb-4">Budget vs Actual Spending</h2>
           {analytics.budgetVsActual.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analytics.budgetVsActual}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis tickFormatter={(value) => `$${value}`} />
-                <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, '']} />
-                <Bar dataKey="budget" fill="#8884d8" name="Budget" />
-                <Bar dataKey="spent" fill="#82ca9d" name="Spent" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div className="space-y-6">
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={analytics.budgetVsActual}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis tickFormatter={(value) => `$${value}`} />
+                  <Tooltip formatter={(value) => [`$${value.toFixed(2)}`, '']} />
+                  <Bar dataKey="budget" fill="#8884d8" name="Budget" />
+                  <Bar dataKey="spent" fill="#82ca9d" name="Spent" />
+                </BarChart>
+              </ResponsiveContainer>
+              
+              {/* Progress Bars with Alerts */}
+              <div className="space-y-3">
+                {analytics.budgetVsActual.slice(0, 3).map((trip, idx) => {
+                  const percentage = trip.budget > 0 ? (trip.spent / trip.budget) * 100 : 0;
+                  const isOverBudget = percentage > 100;
+                  const isNearLimit = percentage > 80 && percentage <= 100;
+                  
+                  return (
+                    <div key={idx} className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="font-medium truncate max-w-[60%]">{trip.name}</span>
+                        <span className={`font-semibold ${isOverBudget ? 'text-red-600' : isNearLimit ? 'text-orange-600' : 'text-green-600'}`}>
+                          {percentage.toFixed(0)}%
+                          {isOverBudget && ' 🚨'}
+                          {isNearLimit && ' ⚠️'}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all ${
+                            isOverBudget ? 'bg-red-500' : 
+                            isNearLimit ? 'bg-orange-500' : 
+                            'bg-green-500'
+                          }`}
+                          style={{ width: `${Math.min(percentage, 100)}%` }}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between text-xs text-gray-600">
+                        <span>${trip.spent.toFixed(2)} spent</span>
+                        <span>${trip.budget.toFixed(2)} budget</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           ) : (
             <div className="text-center py-12 text-gray-500">
               No trip data available
@@ -250,31 +339,60 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Enhanced Summary Cards */}
       <div className="grid md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <h3 className="text-sm font-medium text-gray-600">Total Trips</h3>
-          <p className="text-2xl font-bold text-blue-600">{analytics.budgetVsActual.length}</p>
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-5 rounded-lg shadow-sm border border-blue-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-blue-700">Total Trips</h3>
+              <p className="text-3xl font-bold text-blue-900 mt-2">{analytics.budgetVsActual.length}</p>
+            </div>
+            <span className="text-4xl">✈️</span>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <h3 className="text-sm font-medium text-gray-600">Total Budget</h3>
-          <p className="text-2xl font-bold text-green-600">
-            ${analytics.budgetVsActual.reduce((sum, trip) => sum + trip.budget, 0).toFixed(2)}
-          </p>
+        
+        <div className="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-lg shadow-sm border border-green-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-green-700">Total Budget</h3>
+              <p className="text-3xl font-bold text-green-900 mt-2">
+                ${analytics.budgetVsActual.reduce((sum, trip) => sum + trip.budget, 0).toFixed(0)}
+              </p>
+            </div>
+            <span className="text-4xl">💵</span>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <h3 className="text-sm font-medium text-gray-600">Total Spent</h3>
-          <p className="text-2xl font-bold text-orange-600">
-            ${analytics.budgetVsActual.reduce((sum, trip) => sum + trip.spent, 0).toFixed(2)}
-          </p>
+        
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 p-5 rounded-lg shadow-sm border border-orange-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-orange-700">Total Spent</h3>
+              <p className="text-3xl font-bold text-orange-900 mt-2">
+                ${analytics.budgetVsActual.reduce((sum, trip) => sum + trip.spent, 0).toFixed(0)}
+              </p>
+              <p className="text-xs text-orange-600 mt-1">
+                {overBudgetTrips.length > 0 ? `${overBudgetTrips.length} over budget` : 'All on track'}
+              </p>
+            </div>
+            <span className="text-4xl">💸</span>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow-sm border">
-          <h3 className="text-sm font-medium text-gray-600">Average Efficiency</h3>
-          <p className="text-2xl font-bold text-purple-600">
-            {analytics.tripComparison.length > 0 
-              ? Math.round(analytics.tripComparison.reduce((sum, trip) => sum + trip.efficiency, 0) / analytics.tripComparison.length)
-              : 0}%
-          </p>
+        
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-5 rounded-lg shadow-sm border border-purple-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-purple-700">Avg Efficiency</h3>
+              <p className="text-3xl font-bold text-purple-900 mt-2">
+                {analytics.tripComparison.length > 0 
+                  ? Math.round(analytics.tripComparison.reduce((sum, trip) => sum + trip.efficiency, 0) / analytics.tripComparison.length)
+                  : 0}%
+              </p>
+              <p className="text-xs text-purple-600 mt-1">
+                {totalSavings > 0 ? `$${totalSavings.toFixed(0)} saved` : 'Keep tracking'}
+              </p>
+            </div>
+            <span className="text-4xl">📊</span>
+          </div>
         </div>
       </div>
     </div>
