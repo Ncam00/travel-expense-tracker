@@ -9,6 +9,9 @@ function RealisticEarth({ locations = [], selectedTrip = null, onLocationClick =
   const [targetRotation, setTargetRotation] = useState(0);
   const [currentLocationIndex, setCurrentLocationIndex] = useState(0);
   
+  // Mobile detection for performance
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+  
   // Load realistic Earth texture
   const earthTexture = useLoader(THREE.TextureLoader, 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
   
@@ -44,9 +47,9 @@ function RealisticEarth({ locations = [], selectedTrip = null, onLocationClick =
 
   return (
     <group>
-      {/* Earth sphere with realistic texture */}
+      {/* Earth sphere with realistic texture - lower quality on mobile */}
       <mesh ref={earthRef} position={[0, 0, 0]}>
-        <sphereGeometry args={[2, 64, 64]} />
+        <sphereGeometry args={[2, isMobile ? 32 : 64, isMobile ? 32 : 64]} />
         <meshLambertMaterial map={earthTexture} />
       </mesh>
       
@@ -353,6 +356,10 @@ export default function Globe3D({
   const [visibleRoutes, setVisibleRoutes] = useState([]);
   const [visibleLocations, setVisibleLocations] = useState([]);
   
+  // Mobile detection and optimization
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || window.innerWidth < 768;
+  const canvasRef = useRef();
+  
   // Timeline logic
   useEffect(() => {
     if (timelineMode && locations.length > 0) {
@@ -389,18 +396,23 @@ export default function Globe3D({
   return (
     <div className={`w-full h-full ${className}`}>
       <Canvas
+        ref={canvasRef}
         camera={{ position: [0, 0, 5], fov: 75 }}
-        style={{ background: 'linear-gradient(to bottom, #000428, #004e92)' }}
+        style={{ background: 'linear-gradient(to-bottom, #000428, #004e92)' }}
+        gl={{ 
+          antialias: !isMobile, // Disable anti-aliasing on mobile for performance
+          powerPreference: isMobile ? 'low-power' : 'high-performance'
+        }}
       >
         {/* Lighting - simplified to match working globe */}
         <ambientLight intensity={0.6} />
         <pointLight position={[10, 10, 10]} intensity={1} />
         
-        {/* Stars background */}
+        {/* Stars background - reduced count on mobile */}
         <Stars 
           radius={100} 
           depth={50} 
-          count={2000} 
+          count={isMobile ? 1000 : 2000} 
           factor={4} 
           saturation={0} 
           fade 
@@ -432,13 +444,24 @@ export default function Globe3D({
           />
         ))}
         
-        {/* Controls - same as working globe */}
+        {/* Controls - enhanced for mobile */}
         <OrbitControls 
-          enablePan={true}
+          enablePan={isMobile ? false : true} // Disable pan on mobile to avoid conflicts
           enableZoom={true}
           enableRotate={true}
           minDistance={3}
           maxDistance={8}
+          // Mobile-optimized settings
+          touches={{
+            ONE: THREE.TOUCH.ROTATE, // Single finger rotates
+            TWO: THREE.TOUCH.DOLLY_PAN // Two fingers zoom/pan
+          }}
+          rotateSpeed={isMobile ? 0.8 : 1.0} // Faster rotation on mobile
+          zoomSpeed={isMobile ? 1.2 : 1.0} // Faster zoom on mobile
+          enableDamping={true}
+          dampingFactor={0.05} // Smooth inertia
+          minPolarAngle={Math.PI * 0.1} // Prevent flipping over poles
+          maxPolarAngle={Math.PI * 0.9}
         />
       </Canvas>
     </div>
