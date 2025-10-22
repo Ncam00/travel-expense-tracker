@@ -18,7 +18,14 @@ const initializeFirebase = async () => {
   }
 };
 
-const AuthContext = createContext(undefined);
+const AuthContext = createContext({
+  user: null,
+  loading: true,
+  error: null,
+  login: () => {},
+  signup: () => {},
+  logout: () => {}
+});
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -136,7 +143,7 @@ export function AuthProvider({ children }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

@@ -46,7 +46,9 @@ export default function SimpleGlobePage() {
     try {
       setLoading(true);
       setError(null);
+      console.log('Loading user trips for:', user.uid);
       const userTrips = await tripService.getTrips(user.uid);
+      console.log('Loaded trips:', userTrips);
       
       // Convert trip data to globe format
       const locations = [];
@@ -67,6 +69,7 @@ export default function SimpleGlobePage() {
         }
       });
 
+      console.log('Globe locations:', locations);
       setTrips(userTrips);
       setGlobeData({ locations, routes });
     } catch (error) {
