@@ -111,6 +111,20 @@ export default function Login() {
                 '🚀 Sign in'
               )}
             </button>
+
+            {/* Demo Account Button */}
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('demo@traveltracker.com');
+                  setPassword('demo123');
+                }}
+                className="w-full text-center py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+              >
+                🧪 Use Demo Account
+              </button>
+            </div>
           </form>
 
           <div className="mt-6 text-center">

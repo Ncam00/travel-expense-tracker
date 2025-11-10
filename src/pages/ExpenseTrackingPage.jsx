@@ -22,7 +22,8 @@ export default function ExpenseTrackingPage() {
         destinations: [
           { name: "Tokyo", country: "Japan", lat: 35.6762, lng: 139.6503, totalSpent: 3200, transportMode: 'plane' },
           { name: "Seoul", country: "South Korea", lat: 37.5665, lng: 126.9780, totalSpent: 2100, transportMode: 'plane' },
-          { name: "Bangkok", country: "Thailand", lat: 13.7563, lng: 100.5018, totalSpent: 1500, transportMode: 'plane' }
+          { name: "Bangkok", country: "Thailand", lat: 13.7563, lng: 100.5018, totalSpent: 1500, transportMode: 'plane' },
+          { name: "Hanoi", country: "Vietnam", lat: 21.0285, lng: 105.8542, totalSpent: 800, transportMode: 'plane' }
         ]
       },
       {

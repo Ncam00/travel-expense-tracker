@@ -72,9 +72,9 @@ export default function Home() {
           </div>
           <div className="card hover-lift text-center p-8 group">
             <div className="text-6xl mb-6 block group-hover:scale-110 transition-transform duration-300">👥</div>
-            <h2 className="text-2xl font-bold mb-4 text-white">Group Expenses</h2>
+            <h2 className="text-2xl font-bold mb-4 text-white">Group Collaboration</h2>
             <p className="text-white/70 leading-relaxed">
-              Split costs fairly among travel companions with automatic calculations and settlement tracking.
+              Plan together! Share activities, accommodation, shopping, and transportation with estimated costs. Vote and collaborate in real-time.
             </p>
           </div>
         </div>

@@ -11,6 +11,8 @@ import ExpenseTracker from './pages/ExpenseTracker';
 import TripsPage from './pages/TripsPage';
 import TripDashboard from './pages/TripDashboard';
 import TripPlanningPage from './pages/TripPlanningPage';
+import NewTripPlanningPage from './pages/NewTripPlanningPage';
+import GroupCollaborationPage from './pages/GroupCollaborationPage';
 import SimpleGlobePage from './pages/SimpleGlobePage';
 import TestGlobePage from './pages/TestGlobePage';
 import Analytics from './pages/Analytics';
@@ -57,6 +59,16 @@ function App() {
                 <TripPlanningPage />
               </ProtectedRoute>
             } />
+            <Route path="/trips/:tripId/collaboration" element={
+              <ProtectedRoute>
+                <GroupCollaborationPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/trip-planning" element={
+              <ProtectedRoute>
+                <NewTripPlanningPage />
+              </ProtectedRoute>
+            } />
             <Route path="/expenses" element={
               <ProtectedRoute>
                 <ExpenseTracker />
@@ -69,7 +81,7 @@ function App() {
             } />
             <Route path="/travel-globe" element={
               <ProtectedRoute>
-                <TestGlobePage />
+                <SimpleGlobePage />
               </ProtectedRoute>
             } />
             <Route path="/travel-globe-full" element={

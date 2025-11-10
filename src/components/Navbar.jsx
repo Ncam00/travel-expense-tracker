@@ -39,34 +39,28 @@ const Navbar = () => {
                   📊 Dashboard
                 </Link>
                 <Link
-                  to="/trips"
-                  className={isActive('/trips') ? 'nav-link-active' : 'nav-link'}
+                  to="/trip-planning"
+                  className={isActive('/trip-planning') ? 'nav-link-active' : 'nav-link'}
                 >
-                  🎒 Trips
-                </Link>
-                <Link
-                  to="/join"
-                  className={isActive('/join') ? 'nav-link-active' : 'nav-link'}
-                >
-                  👥 Join Trip
+                  �️ Trip Planning
                 </Link>
                 <Link
                   to="/expenses"
                   className={isActive('/expenses') ? 'nav-link-active' : 'nav-link'}
                 >
-                  💰 Expenses
-                </Link>
-                <Link
-                  to="/analytics"
-                  className={isActive('/analytics') ? 'nav-link-active' : 'nav-link'}
-                >
-                  📈 Analytics
+                  💰 Expense Tracking
                 </Link>
                 <Link
                   to="/travel-globe"
                   className={isActive('/travel-globe') ? 'nav-link-active' : 'nav-link'}
                 >
-                  🌍 Globe
+                  🌍 Travel Globe
+                </Link>
+                <Link
+                  to="/trips/demo-trip/collaboration"
+                  className={isActive('/trips/demo-trip/collaboration') ? 'nav-link-active' : 'nav-link'}
+                >
+                  👥 Group Planning
                 </Link>
                 <Link
                   to="/testing"
