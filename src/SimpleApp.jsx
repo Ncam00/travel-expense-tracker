@@ -1,17 +1,37 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from 'react';
 
-// Simple fallback components
-function SimpleHome() {
+function SimpleApp() {
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ color: 'green' }}>🏠 Home Page Working!</h1>
-      <div style={{ marginTop: '20px' }}>
-        <h2>Navigation Test:</h2>
-        <div style={{ display: 'flex', gap: '10px', flexDirection: 'column', maxWidth: '200px' }}>
-          <a href="/debug" style={{ padding: '10px', backgroundColor: 'blue', color: 'white', textDecoration: 'none', borderRadius: '5px', textAlign: 'center' }}>Debug Page</a>
-          <a href="/test" style={{ padding: '10px', backgroundColor: 'green', color: 'white', textDecoration: 'none', borderRadius: '5px', textAlign: 'center' }}>Simple Test</a>
-          <a href="/login" style={{ padding: '10px', backgroundColor: 'purple', color: 'white', textDecoration: 'none', borderRadius: '5px', textAlign: 'center' }}>Login Page</a>
-        </div>
+    <div style={{ padding: '20px', minHeight: '100vh', backgroundColor: '#f3f4f6', fontFamily: 'Arial, sans-serif' }}>
+      <h1 style={{ color: '#1f2937', fontSize: '2rem', marginBottom: '1rem' }}>
+        � Travel Tracker - Test Mode
+      </h1>
+      <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
+        This is a minimal test version. If you can see this, React is working!
+      </p>
+      
+      <div style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <h2 style={{ color: '#1f2937', marginBottom: '1rem' }}>Status Check</h2>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          <li style={{ marginBottom: '0.5rem' }}>✅ React is rendering</li>
+          <li style={{ marginBottom: '0.5rem' }}>✅ CSS is working</li>
+          <li style={{ marginBottom: '0.5rem' }}>✅ JavaScript is executing</li>
+        </ul>
+        
+        <button 
+          onClick={() => alert('JavaScript is working!')}
+          style={{ 
+            backgroundColor: '#3b82f6', 
+            color: 'white', 
+            padding: '0.5rem 1rem', 
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            marginTop: '1rem'
+          }}
+        >
+          Test Button
+        </button>
       </div>
     </div>
   );
